@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 
 #intial variables
 massList = np.array([])
-numPosMass= 500
+numPosMass= 50  
+
 numNegMass= 0
 radius = 5000
 numSim = 50
@@ -101,4 +102,29 @@ for i in range(0,numSim):
       
 vel = np.sqrt(xVel**2+yVel**2+zVel**2)
 rad = np.sqrt(xPos**2+yPos**2+zPos**2)
-plt.plot(rad,vel,'go')
+
+for iter_num in range(len(vel)-1,0,-1):
+    for idx in range(iter_num):
+        if vel[idx]>vel[idx+1]:
+            
+            temp = rad[idx]
+            rad[idx] = rad[idx+1]
+            rad[idx+1] = temp
+            
+            temp2 = vel[idx]
+            vel[idx] = vel[idx+1]
+            vel[idx+1] = temp2
+            
+#compute the moving averages
+radius_movingAvg = np.array([])
+velocity_movingAvg = np.array([])
+
+print('Computing moving averages')
+t = 10 #moving average variable
+for i in range(len(rad)-t):
+    velocity_temp_array = vel[i:i+t]
+    r = np.mean(rad[i:i+t])
+    radius_movingAvg = np.append(radius_movingAvg,r)
+    velocity_movingAvg = np.append(velocity_movingAvg,np.mean(velocity_temp_array))
+
+plt.plot(radius_movingAvg, velocity_movingAvg,'ro')
