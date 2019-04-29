@@ -1,30 +1,29 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 26 10:53:25 2019
-
-@author: Kevin H. Bhimani
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+#intial variables
 massList = np.array([])
-numPosMass= 50
+numPosMass= 500
 numNegMass= 0
 radius = 5000
-numSim = 100
+numSim = 50
 G = 1.0
 
+#sets the masses
 for i in range(0,numPosMass+numNegMass):
     massList = np.append(massList,0.01)
 
+#Puts the objects in random places
 xPos = np.array(np.random.uniform(-radius,radius,len(massList)))
 yPos = np.array(np.random.uniform(-radius,radius,len(massList)))
 zPos = np.array(np.random.uniform(-radius,radius,len(massList)))
 
+#For each object, finds two different random angles for velocity direction
 phi = np.random.uniform(0, 2*np.pi, numPosMass)
 theta = np.random.uniform(0,(np.pi)/2, numPosMass)
-cirVel = np.sqrt(G*massList[i]/(xPos**2+yPos**2+zPos**2))
+#finds what the circlar velocity should be given position
+cirVel = np.sqrt(G*massList[i]/np.sqrt(xPos**2+yPos**2+zPos**2))
+#finds the cartesian coponents of velocties
 xVel = cirVel*np.sin(theta)*np.cos(phi)
 yVel = cirVel*np.sin(theta)*np.sin(phi)
 zVel = cirVel*np.cos(theta)
@@ -38,9 +37,9 @@ def updateVelocities(xVel,yVel,zVel):
         temp_ax_array = np.array([])
         temp_ay_array = np.array([])
         temp_az_array = np.array([])
-        for j in range(0,len(massList)-1):
+        for j in range(0,len(massList)):
             if j == i:
-                j+=1
+                continue                
             temp_ax = G*massList[j]/((xPos[j]-xPos[i])**2)
             if xPos[j]-xPos[i]>0:
                 temp_ax_array = np.append(temp_ax_array,temp_ax)
@@ -68,7 +67,7 @@ def updateVelocities(xVel,yVel,zVel):
     return xVel,yVel,zVel
     
 def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
-    for i in range(0,len(massList)-1):
+    for i in range(0,len(massList)):
         if xPos[i] > radius:
             xVel[i] = -1*xVel[i]
             xPos = radius
@@ -91,15 +90,15 @@ def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
             zPos = -1*radius
     return xPos,yPos,zPos,xVel,yVel,zVel
 
-#for i in range(0,numSim):
-#    if i % 10 == 0:
-#        print('Running interation', i)
-#    xVel,yVel,zVel = updateVelocities(xVel,yVel,zVel)
-#    xPos = xPos + xVel
-#    yPos = yPos + yVel
-#    zPos = zPos + zVel
-#    xPos,yPos,zPos,xVel,yVel,zVel = applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel)
-#      
+for i in range(0,numSim):
+    if i % 10 == 0:
+        print('Running interation', i)
+    xVel,yVel,zVel = updateVelocities(xVel,yVel,zVel)
+    xPos = xPos + xVel
+    yPos = yPos + yVel
+    zPos = zPos + zVel
+    xPos,yPos,zPos,xVel,yVel,zVel = applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel)
+      
 vel = np.sqrt(xVel**2+yVel**2+zVel**2)
 rad = np.sqrt(xPos**2+yPos**2+zPos**2)
 plt.plot(rad,vel,'go')
