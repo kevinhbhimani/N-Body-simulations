@@ -8,7 +8,7 @@ numPosMass= 500
 numNegMass= 2700
 radius = 25000
 G = 1.0
-numSim = 1000
+numSim = 100
 timeStep = 0.1
 totalParticles = numPosMass+numNegMass
 
