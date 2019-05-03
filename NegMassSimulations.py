@@ -4,30 +4,32 @@ import matplotlib.pyplot as plt
 #intial variables
 massList = np.array([])
 numPosMass= 50 
-
-numNegMass= 0
+numNegMass= 270
 radius = 5000
 G = 1.0
 numSim = 10
 timeStep = 0.1
-
-
 totalParticles = numPosMass+numNegMass
 
+#the ratio of dark matter to normal matter is roughly 27:5
+
 #sets the masses
-for i in range(0,totalParticles):
+for i in range(0,numPosMass):
     massList = np.append(massList,0.01)
 
+for i in range(0,numNegMass):
+    massList = np.append(massList,-1*0.01)
+
 #Puts the objects in random places
-xPos = np.array(np.random.uniform(-radius,radius,len(massList)))
-yPos = np.array(np.random.uniform(-radius,radius,len(massList)))
-zPos = np.array(np.random.uniform(-radius,radius,len(massList)))
+xPos = np.array(np.random.uniform(-radius,radius,totalParticles))
+yPos = np.array(np.random.uniform(-radius,radius,totalParticles))
+zPos = np.array(np.random.uniform(-radius,radius,totalParticles))
 
 #For each object, finds two different random angles for velocity direction
-phi = np.random.uniform(0, 2*np.pi, numPosMass)
-theta = np.random.uniform(0,(np.pi)/2, numPosMass)
+phi = np.random.uniform(0, 2*np.pi, totalParticles)
+theta = np.random.uniform(0,(np.pi)/2, totalParticles)
 #finds what the circlar velocity should be given position
-cirVel = np.sqrt(G*massList/np.sqrt(xPos**2+yPos**2+zPos**2))
+cirVel = np.sqrt(G*np.abs(massList)/np.sqrt(xPos**2+yPos**2+zPos**2))
 #finds the cartesian coponents of velocties
 xVel = cirVel*np.sin(theta)*np.cos(phi)
 yVel = cirVel*np.sin(theta)*np.sin(phi)
@@ -41,11 +43,14 @@ def updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z):
     a_x_new = np.array([])
     a_y_new = np.array([])
     a_z_new = np.array([])
+    #goes through all the object
     for i in range(0,len(massList)):       
         temp_ax_array = np.array([])
         temp_ay_array = np.array([])
         temp_az_array = np.array([])
+        #for a given object, finds the accelation due to all other objects
         for j in range(0,len(massList)):
+            #skips the iteration if it is the object itself
             if j == i:
                 continue                
             temp_ax = G*massList[j]/((xPos[j]-xPos[i])**2)
@@ -107,10 +112,27 @@ for i in range(0,int(numSim/timeStep)):
     zPos = zPos + zVel*timeStep + (a_z*timeStep**2)/2
     xPos,yPos,zPos,xVel,yVel,zVel = applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel)
     
-circVelocity = np.sqrt(xVel**2+yVel**2+zVel**2)
-rad = np.sqrt(xPos**2+yPos**2+zPos**2)
-    
-dotProd = xPos*xVel + yPos*yVel +zPos*zVel    
+
+pos_x,pos_y,pos_z,pos_xVel, pos_yVel, pos_zVel = np.array([]),np.array([]),np.array([]),np.array([]),np.array([]),np.array([])
+
+for i in range(0,totalParticles):
+    if(massList[i]>0):
+        pos_x = np.append(pos_x,xPos[i])
+        pos_y = np.append(pos_y,yPos[i])
+        pos_z = np.append(pos_z,zPos[i])
+        pos_xVel = np.append(pos_xVel,xVel[i])
+        pos_yVel = np.append(pos_yVel,yVel[i])
+        pos_zVel = np.append(pos_zVel,zVel[i])
+        
+rad = np.sqrt(pos_x**2+pos_y**2+pos_z**2)
+
+#r_sqrd = pos_x**2+pos_y**2+pos_z**2
+
+#xcomp = np.array((pos_x**2*pos_xVel + pos_x*pos_y*pos_yVel + pos_x*pos_z*pos_zVel)/r_sqrd - pos_xVel)
+#ycomp = np.array((pos_x*pos_y*pos_xVel + pos_y**2*pos_yVel + pos_y*pos_z*pos_zVel)/r_sqrd - pos_yVel)
+#zcomp = np.array((pos_x*pos_z*pos_xVel + pos_y*pos_z*pos_yVel + pos_z**2*pos_zVel)/r_sqrd - pos_zVel)
+
+circVelocity = np.array((pos_xVel**2 + pos_yVel**2 + pos_zVel**2)**0.5)
 
 #sorts according to the radius
 for iter_num in range(len(rad)-1,0,-1):
@@ -139,7 +161,7 @@ for i in range(len(rad)-t):
 
 test_vel = np.sqrt(G*0.01/radius_movingAvg)
 plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
-plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
+#plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
 plt.xlabel('Radius')
 plt.ylabel('Circular Velocity')
