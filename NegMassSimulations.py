@@ -138,7 +138,7 @@ for i in range(len(rad)-t):
     velocity_movingAvg = np.append(velocity_movingAvg,np.mean(velocity_temp_array))
 
 test_vel = np.sqrt(G*0.01/radius_movingAvg)
-plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='caluclated')
+plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
 plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
 plt.xlabel('Radius')
