@@ -1,13 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 #intial variables
 massList = np.array([])
-numPosMass= 50 
-numNegMass= 270
-radius = 5000
+numPosMass= 500
+numNegMass= 2700
+radius = 25000
 G = 1.0
-numSim = 5
+numSim = 1000
 timeStep = 0.1
 totalParticles = numPosMass+numNegMass
 
@@ -111,9 +112,9 @@ def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
             zPos = -1*radius
     return xPos,yPos,zPos,xVel,yVel,zVel
 
-for i in range(0,int(numSim/timeStep)):
-    if i % 10 == 0:
-        print('Running interation', i)
+for i in tqdm(range(0,int(numSim/timeStep))):
+#    if i % 10 == 0:
+#        print('Running interation', i)
     xVel,yVel,zVel,a_x,a_y,a_z = updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z)
     #calculates the position using Velocity Verlet algorithym   
     xPos = xPos + xVel*timeStep + (a_x*timeStep**2)/2
