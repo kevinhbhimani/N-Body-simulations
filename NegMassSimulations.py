@@ -61,13 +61,13 @@ def updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z):
             else:
                 temp_ax_array = np.append(temp_ax_array,temp_ax)  
         
-            temp_ay = G*massList[i]*massList[j]/((yPos[j]-yPos[i])**2)
+            temp_ay = G*massList[j]/((yPos[j]-yPos[i])**2)
             if yPos[j]-yPos[i]>0:
                 temp_ay_array = np.append(temp_ay_array,-1*temp_ay)
             else:
                 temp_ay_array = np.append(temp_ay_array,temp_ay)
             
-            temp_az = G*massList[i]*massList[j]/((zPos[j]-zPos[i])**2)
+            temp_az = G*massList[j]/((zPos[j]-zPos[i])**2)
             if zPos[j]-zPos[i]>0:
                 temp_az_array = np.append(temp_az_array,-1*temp_az)
             else:
