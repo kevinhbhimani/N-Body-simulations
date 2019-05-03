@@ -7,7 +7,7 @@ numPosMass= 50
 numNegMass= 270
 radius = 5000
 G = 1.0
-numSim = 10
+numSim = 5
 timeStep = 0.1
 totalParticles = numPosMass+numNegMass
 
@@ -54,33 +54,41 @@ def updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z):
             if j == i:
                 continue                
             temp_ax = G*massList[j]/((xPos[j]-xPos[i])**2)
+            #if the object is on the right, then acceleration is negative
             if xPos[j]-xPos[i]>0:
-                temp_ax_array = np.append(temp_ax_array,temp_ax)
+                temp_ax_array = np.append(temp_ax_array,-1*temp_ax)
+            #if the object is on the left, then acceleration is positive
             else:
-                temp_ax_array = np.append(temp_ax_array,-1*temp_ax)  
+                temp_ax_array = np.append(temp_ax_array,temp_ax)  
         
             temp_ay = G*massList[i]*massList[j]/((yPos[j]-yPos[i])**2)
             if yPos[j]-yPos[i]>0:
-                temp_ay_array = np.append(temp_ay_array,temp_ay)
-            else:
                 temp_ay_array = np.append(temp_ay_array,-1*temp_ay)
+            else:
+                temp_ay_array = np.append(temp_ay_array,temp_ay)
             
             temp_az = G*massList[i]*massList[j]/((zPos[j]-zPos[i])**2)
             if zPos[j]-zPos[i]>0:
-                temp_az_array = np.append(temp_az_array,temp_az)
-            else:
                 temp_az_array = np.append(temp_az_array,-1*temp_az)
+            else:
+                temp_az_array = np.append(temp_az_array,temp_az)
+                
+        #calculates the net acceleration of a given object due to all other        
         a_x_new = np.append(a_x_new,np.mean(temp_ax_array))
         a_y_new = np.append(a_y_new,np.mean(temp_ay_array))
         a_z_new = np.append(a_z_new,np.mean(temp_az_array))
+    
+    #calculates the velocities using Velocity Verlet algorithym    
     xVel = xVel + ((a_x + a_x_new)*timeStep)/2
     yVel = yVel + ((a_y + a_y_new)*timeStep)/2
     zVel = zVel + ((a_z + a_z_new)*timeStep)/2
     
     return xVel,yVel,zVel,a_x_new,a_y_new,a_z_new
-    
+
+#applies boundary conditions and makes sure that the object is inside the box    
 def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
     for i in range(0,len(massList)):
+        
         if xPos[i] > radius:
             xVel[i] = -1*xVel[i]
             xPos = radius
@@ -107,6 +115,7 @@ for i in range(0,int(numSim/timeStep)):
     if i % 10 == 0:
         print('Running interation', i)
     xVel,yVel,zVel,a_x,a_y,a_z = updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z)
+    #calculates the position using Velocity Verlet algorithym   
     xPos = xPos + xVel*timeStep + (a_x*timeStep**2)/2
     yPos = yPos + yVel*timeStep + (a_y*timeStep**2)/2
     zPos = zPos + zVel*timeStep + (a_z*timeStep**2)/2
@@ -115,6 +124,7 @@ for i in range(0,int(numSim/timeStep)):
 
 pos_x,pos_y,pos_z,pos_xVel, pos_yVel, pos_zVel = np.array([]),np.array([]),np.array([]),np.array([]),np.array([]),np.array([])
 
+#Makes a list of the position and velocities of objects with positive mass
 for i in range(0,totalParticles):
     if(massList[i]>0):
         pos_x = np.append(pos_x,xPos[i])
@@ -159,7 +169,7 @@ for i in range(len(rad)-t):
     radius_movingAvg = np.append(radius_movingAvg,np.mean(radius_temp_array))
     velocity_movingAvg = np.append(velocity_movingAvg,np.mean(velocity_temp_array))
 
-test_vel = np.sqrt(G*0.01/radius_movingAvg)
+#test_vel = np.sqrt(G*0.01/radius_movingAvg)
 plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
 #plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
