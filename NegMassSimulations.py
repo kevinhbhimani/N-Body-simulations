@@ -3,17 +3,18 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 #intial variables
-massList = np.array([])
-numPosMass= 500
-numNegMass= 2700
-radius = 25000
-G = 1.0
-numSim = 100
-timeStep = 0.1
-totalParticles = numPosMass+numNegMass
-
+numPosMass= 50
+numNegMass= 270
 #the ratio of dark matter to normal matter is roughly 27:5
+radius = 2500
+G = 1.0
+numSim = 1
+timeStep = 0.1
+guassVeloComp = 0
+t = 10 #moving average variable     
 
+totalParticles = numPosMass+numNegMass
+massList = np.array([])
 #sets the masses
 for i in range(0,numPosMass):
     massList = np.append(massList,0.01)
@@ -32,9 +33,9 @@ theta = np.random.uniform(0,(np.pi)/2, totalParticles)
 #finds what the circlar velocity should be given position
 cirVel = np.sqrt(G*np.abs(massList)/np.sqrt(xPos**2+yPos**2+zPos**2))
 #finds the cartesian coponents of velocties
-xVel = cirVel*np.sin(theta)*np.cos(phi)
-yVel = cirVel*np.sin(theta)*np.sin(phi)
-zVel = cirVel*np.cos(theta)
+xVel = cirVel*np.sin(theta)*np.cos(phi) + np.random.normal(0.0, guassVeloComp, 1)
+yVel = cirVel*np.sin(theta)*np.sin(phi) + np.random.normal(0.0, guassVeloComp, 1)
+zVel = cirVel*np.cos(theta) + np.random.normal(0.0, guassVeloComp, 1)
 
 a_x = np.zeros(totalParticles)
 a_y = np.zeros(totalParticles)
@@ -146,6 +147,8 @@ rad = np.sqrt(pos_x**2+pos_y**2+pos_z**2)
 circVelocity = np.array((pos_xVel**2 + pos_yVel**2 + pos_zVel**2)**0.5)
 
 #sorts according to the radius
+print('Sorting by radius')
+
 for iter_num in range(len(rad)-1,0,-1):
     for idx in range(iter_num):
         if rad[idx]>rad[idx+1]:
@@ -163,7 +166,7 @@ radius_movingAvg = np.array([])
 velocity_movingAvg = np.array([])
 
 print('Computing moving averages')
-t = 10 #moving average variable     
+
 for i in range(len(rad)-t):
     velocity_temp_array = circVelocity[i:i+t]
     radius_temp_array = rad[i:i+t]
@@ -171,7 +174,7 @@ for i in range(len(rad)-t):
     velocity_movingAvg = np.append(velocity_movingAvg,np.mean(velocity_temp_array))
 
 #test_vel = np.sqrt(G*0.01/radius_movingAvg)
-plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
+plt.plot(radius_movingAvg, velocity_movingAvg,label='calculated')
 #plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
 plt.xlabel('Radius')
