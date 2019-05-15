@@ -186,21 +186,22 @@ plt.legend(loc='upper right')
 plt.xlabel('Radius')
 plt.ylabel('Circular Velocity')
 
-##find the density
-#s = int(len(rad)/5)
-#
-#location = np.array([])
-#density = np.array([])
-#counter = 0
-#t = s
-#for i in range(0,len(radius_movingAvg)-s):
-#    if rad[i] < rad[t]:
-#        counter = counter + 1
-#    if i%s == 0 and i != 0:
-#        density = np.append(density, counter)
-#        location = np.append(location,np.mean(radius_movingAvg[i-s:i]))
-#        counter = 0
-#        t = t + s      
-#        
-#plt.plot(location, density,'go')
+#find the density
+s = int(len(rad)/20)
+
+location = np.array([])
+density = np.array([])
+counter = 0
+t=1
+for i in range(0,len(radius_movingAvg)-s):
+     for i in range(s,s+20) :
+         if radius_movingAvg <= radius*t/s:
+             counter = counter + 1
+     density = np.append(density, counter) 
+     location = np.append(location,np.mean(radius_movingAvg[i:i+s]))
+     counter = 0
+     i = i+s
+     t = t+1
+        
+plt.plot(location, density,'go')
 
