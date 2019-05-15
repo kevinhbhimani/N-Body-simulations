@@ -4,13 +4,13 @@ from tqdm import tqdm
 
 #intial variables
 numPosMass= 50
-numNegMass= 270
+numNegMass= 0
 #the ratio of dark matter to normal matter is roughly 27:5
 radius = 2500
 G = 1.0
-numSim = 1
-timeStep = 0.1
-guassVeloComp = 0
+numSim = 10
+timeStep = 0.01
+guassVeloComp = 0.0
 t = 10 #moving average variable     
 
 totalParticles = numPosMass+numNegMass
@@ -28,14 +28,20 @@ yPos = np.array(np.random.uniform(-radius,radius,totalParticles))
 zPos = np.array(np.random.uniform(-radius,radius,totalParticles))
 
 #For each object, finds two different random angles for velocity direction
-phi = np.random.uniform(0, 2*np.pi, totalParticles)
-theta = np.random.uniform(0,(np.pi)/2, totalParticles)
+phi = np.random.uniform(0, 2*np.pi, numPosMass)
+theta = np.random.uniform(0,(np.pi)/2, numPosMass)
 #finds what the circlar velocity should be given position
-cirVel = np.sqrt(G*np.abs(massList)/np.sqrt(xPos**2+yPos**2+zPos**2))
+cirVel = np.sqrt(G*massList[0:numPosMass]/np.sqrt(xPos[0:numPosMass]**2+yPos[0:numPosMass]**2+zPos[0:numPosMass]**2))
 #finds the cartesian coponents of velocties
 xVel = cirVel*np.sin(theta)*np.cos(phi) + np.random.normal(0.0, guassVeloComp, 1)
 yVel = cirVel*np.sin(theta)*np.sin(phi) + np.random.normal(0.0, guassVeloComp, 1)
 zVel = cirVel*np.cos(theta) + np.random.normal(0.0, guassVeloComp, 1)
+
+for i in range(0,numNegMass):
+    xVel = np.append(xVel,0)
+    yVel = np.append(yVel,0)
+    zVel = np.append(zVel,0)
+
 
 a_x = np.zeros(totalParticles)
 a_y = np.zeros(totalParticles)
@@ -173,9 +179,28 @@ for i in range(len(rad)-t):
     radius_movingAvg = np.append(radius_movingAvg,np.mean(radius_temp_array))
     velocity_movingAvg = np.append(velocity_movingAvg,np.mean(velocity_temp_array))
 
-#test_vel = np.sqrt(G*0.01/radius_movingAvg)
-plt.plot(radius_movingAvg, velocity_movingAvg,label='calculated')
+test_vel = np.sqrt(G*0.01/radius_movingAvg)
+plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
 #plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
 plt.xlabel('Radius')
 plt.ylabel('Circular Velocity')
+
+##find the density
+#s = int(len(rad)/5)
+#
+#location = np.array([])
+#density = np.array([])
+#counter = 0
+#t = s
+#for i in range(0,len(radius_movingAvg)-s):
+#    if rad[i] < rad[t]:
+#        counter = counter + 1
+#    if i%s == 0 and i != 0:
+#        density = np.append(density, counter)
+#        location = np.append(location,np.mean(radius_movingAvg[i-s:i]))
+#        counter = 0
+#        t = t + s      
+#        
+#plt.plot(location, density,'go')
+
