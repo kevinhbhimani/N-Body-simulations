@@ -11,7 +11,7 @@ G = 1.0
 numSim = 10
 timeStep = 0.01
 guassVeloComp = 0.0
-t = 10 #moving average variable     
+t = 25 #moving average variable     
 
 totalParticles = numPosMass+numNegMass
 massList = np.array([])
@@ -133,14 +133,14 @@ for i in tqdm(range(0,int(numSim/timeStep))):
 pos_x,pos_y,pos_z,pos_xVel, pos_yVel, pos_zVel = np.array([]),np.array([]),np.array([]),np.array([]),np.array([]),np.array([])
 
 #Makes a list of the position and velocities of objects with positive mass
-for i in range(0,totalParticles):
-    if(massList[i]>0):
-        pos_x = np.append(pos_x,xPos[i])
-        pos_y = np.append(pos_y,yPos[i])
-        pos_z = np.append(pos_z,zPos[i])
-        pos_xVel = np.append(pos_xVel,xVel[i])
-        pos_yVel = np.append(pos_yVel,yVel[i])
-        pos_zVel = np.append(pos_zVel,zVel[i])
+
+pos_x = xPos[0:numPosMass]
+pos_y = yPos[0:numPosMass]
+pos_z = zPos[0:numPosMass]
+
+pos_xVel = xVel[0:numPosMass]
+pos_yVel = yVel[0:numPosMass]
+pos_zVel = zVel[0:numPosMass]
         
 rad = np.sqrt(pos_x**2+pos_y**2+pos_z**2)
 
@@ -180,28 +180,29 @@ for i in range(len(rad)-t):
     velocity_movingAvg = np.append(velocity_movingAvg,np.mean(velocity_temp_array))
 
 test_vel = np.sqrt(G*0.01/radius_movingAvg)
+
 plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
-#plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
+plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
 plt.xlabel('Radius')
 plt.ylabel('Circular Velocity')
 
-#find the density
-s = int(len(rad)/20)
-
-location = np.array([])
-density = np.array([])
-counter = 0
-t=1
-for i in range(0,len(radius_movingAvg)-s):
-     for i in range(s,s+20) :
-         if radius_movingAvg <= radius*t/s:
-             counter = counter + 1
-     density = np.append(density, counter) 
-     location = np.append(location,np.mean(radius_movingAvg[i:i+s]))
-     counter = 0
-     i = i+s
-     t = t+1
-        
-plt.plot(location, density,'go')
+##find the density
+#s = int(len(rad)/20)
+#
+#location = np.array([])
+#density = np.array([])
+#counter = 0
+#t=1
+#for i in range(0,len(radius_movingAvg)-s):
+#     for i in range(s,s+20) :
+#         if radius_movingAvg[i] <= radius*t/s:
+#             counter = counter + 1
+#     density = np.append(density, counter) 
+#     location = np.append(location,np.mean(radius_movingAvg[i:i+s]))
+#     counter = 0
+#     i = i+s
+#     t = t+1
+#        
+#plt.plot(location, density,'go')
 
