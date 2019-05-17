@@ -4,14 +4,15 @@ from tqdm import tqdm
 
 #intial variables
 numPosMass= 50
-numNegMass= 0
+numNegMass= 270
+
 #the ratio of dark matter to normal matter is roughly 27:5
 radius = 2500
 G = 1.0
-numSim = 10
+numSim = 1
 timeStep = 0.01
-guassVeloComp = 0.0
-t = 25 #moving average variable     
+guassVeloComp = 0.3
+t = 5 #moving average variable     
 
 totalParticles = numPosMass+numNegMass
 massList = np.array([])
@@ -37,6 +38,7 @@ xVel = cirVel*np.sin(theta)*np.cos(phi) + np.random.normal(0.0, guassVeloComp, 1
 yVel = cirVel*np.sin(theta)*np.sin(phi) + np.random.normal(0.0, guassVeloComp, 1)
 zVel = cirVel*np.cos(theta) + np.random.normal(0.0, guassVeloComp, 1)
 
+#negative mass particles start at rest
 for i in range(0,numNegMass):
     xVel = np.append(xVel,0)
     yVel = np.append(yVel,0)
@@ -93,7 +95,8 @@ def updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z):
     
     return xVel,yVel,zVel,a_x_new,a_y_new,a_z_new
 
-#applies boundary conditions and makes sure that the object is inside the box    
+#applies boundary conditions and makes sure that the object is inside the box 
+#if the object is outside the box, flips the velocity and brings it back to the edge
 def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
     for i in range(0,len(massList)):
         
@@ -120,8 +123,6 @@ def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
     return xPos,yPos,zPos,xVel,yVel,zVel
 
 for i in tqdm(range(0,int(numSim/timeStep))):
-#    if i % 10 == 0:
-#        print('Running interation', i)
     xVel,yVel,zVel,a_x,a_y,a_z = updateVelocities(xVel,yVel,zVel,a_x,a_y,a_z)
     #calculates the position using Velocity Verlet algorithym   
     xPos = xPos + xVel*timeStep + (a_x*timeStep**2)/2
@@ -182,7 +183,7 @@ for i in range(len(rad)-t):
 test_vel = np.sqrt(G*0.01/radius_movingAvg)
 
 plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
-plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
+#plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
 plt.xlabel('Radius')
 plt.ylabel('Circular Velocity')
