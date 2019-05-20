@@ -3,40 +3,69 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 #intial variables
-numPosMass= 50
-numNegMass= 270
+numPosMass= 500
+numNegMass= 2700
 
 #the ratio of dark matter to normal matter is roughly 27:5
-radius = 2500
+radius = 25000
 G = 1.0
-numSim = 1
+numSim = 100
 timeStep = 0.01
 guassVeloComp = 0.3
 t = 5 #moving average variable     
 
 totalParticles = numPosMass+numNegMass
 massList = np.array([])
+
+
+
 #sets the masses
 for i in range(0,numPosMass):
     massList = np.append(massList,0.01)
 
 for i in range(0,numNegMass):
     massList = np.append(massList,-1*0.01)
-
+    
 #Puts the objects in random places
-xPos = np.array(np.random.uniform(-radius,radius,totalParticles))
-yPos = np.array(np.random.uniform(-radius,radius,totalParticles))
-zPos = np.array(np.random.uniform(-radius,radius,totalParticles))
+    
+    
+#xPos = np.array(np.random.uniform(-radius,radius,totalParticles))
+#yPos = np.array(np.random.uniform(-radius,radius,totalParticles))
+#zPos = np.array(np.random.uniform(-radius,radius,totalParticles))
+
+    
+x_Neg = np.array(np.random.uniform(-radius,radius,numNegMass))
+y_Neg = np.array(np.random.uniform(-radius,radius,numNegMass))
+z_Neg = np.array(np.random.uniform(-radius,radius,numNegMass))
+
+
+def hernquist_ppf(r, a_scale):
+    ppf = (a_scale-(a_scale*r)+np.sqrt(a_scale**2 - (r*(a_scale**2))))/r
+    return ppf
+
+r = hernquist_ppf(np.random.uniform(0, 1, numPosMass), 1.0)
+    
+phi = np.random.uniform(0, 2*np.pi, numPosMass)    
+theta = np.arccos(np.random.uniform(-1, 1, numPosMass))
+    
+x_Pos= r*np.sin(theta)*np.cos(phi)
+y_Pos = r*np.sin(theta)*np.sin(phi)
+z_Pos = r*np.cos(theta)
+    
+xPos = np.concatenate((x_Pos, x_Neg), axis=0)
+yPos = np.concatenate((y_Pos, y_Neg), axis=0)
+zPos = np.concatenate((x_Pos, z_Neg), axis=0)
+
 
 #For each object, finds two different random angles for velocity direction
-phi = np.random.uniform(0, 2*np.pi, numPosMass)
-theta = np.random.uniform(0,(np.pi)/2, numPosMass)
+phi_2 = np.random.uniform(0, 2*np.pi, numPosMass)
+theta_2 = np.random.uniform(0,(np.pi)/2, numPosMass)
 #finds what the circlar velocity should be given position
 cirVel = np.sqrt(G*massList[0:numPosMass]/np.sqrt(xPos[0:numPosMass]**2+yPos[0:numPosMass]**2+zPos[0:numPosMass]**2))
 #finds the cartesian coponents of velocties
-xVel = cirVel*np.sin(theta)*np.cos(phi) + np.random.normal(0.0, guassVeloComp, 1)
-yVel = cirVel*np.sin(theta)*np.sin(phi) + np.random.normal(0.0, guassVeloComp, 1)
-zVel = cirVel*np.cos(theta) + np.random.normal(0.0, guassVeloComp, 1)
+xVel = cirVel*np.sin(theta_2)*np.cos(phi_2) + np.random.normal(0.0, guassVeloComp, 1)
+yVel = cirVel*np.sin(theta_2)*np.sin(phi_2) + np.random.normal(0.0, guassVeloComp, 1)
+zVel = cirVel*np.cos(theta_2) + np.random.normal(0.0, guassVeloComp, 1)
 
 #negative mass particles start at rest
 for i in range(0,numNegMass):
@@ -102,24 +131,24 @@ def applyBoundaryConditions(xPos,yPos,zPos,xVel,yVel,zVel):
         
         if xPos[i] > radius:
             xVel[i] = -1*xVel[i]
-            xPos = radius
+            xPos[i] = radius
         if xPos[i] < -1*radius:
             xVel[i] = -1*xVel[i]
-            xPos = -1*radius
+            xPos[i] = -1*radius
 
         if yPos[i] > radius:
             yVel[i] = -1*yVel[i]
-            yPos = radius
+            yPos[i] = radius
         if yPos[i] < -1*radius: 
             yVel[i] = -1*yVel[i]
-            yPos = -1*radius
+            yPos[i] = -1*radius
             
         if zPos[i] > radius:
             zVel[i] = -1*zVel[i]
-            zPos = radius
+            zPos[i] = radius
         if zPos[i] < -1*radius:
             zVel[i] = -1*zVel[i]
-            zPos = -1*radius
+            zPos[i] = -1*radius
     return xPos,yPos,zPos,xVel,yVel,zVel
 
 for i in tqdm(range(0,int(numSim/timeStep))):
@@ -183,8 +212,10 @@ for i in range(len(rad)-t):
 test_vel = np.sqrt(G*0.01/radius_movingAvg)
 
 plt.plot(radius_movingAvg, velocity_movingAvg,'ro',label='calculated')
+
 #plt.plot(radius_movingAvg,test_vel,'bo',label='actual')
 plt.legend(loc='upper right')
+#plt.xlim(0,10)
 plt.xlabel('Radius')
 plt.ylabel('Circular Velocity')
 
